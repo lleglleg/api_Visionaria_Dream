@@ -4,6 +4,8 @@ let config = {
     user: 'app_termo',
     password: 'pr4d1ppsrv',
     database: 'VRLand',
+    requestTimeout: 180000, // for timeout setting
+    connectionTimeout: 180000, 
     options: {
         enableArithAbort: false,
         encrypt: false
