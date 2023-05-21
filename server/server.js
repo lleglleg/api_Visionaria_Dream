@@ -14,6 +14,6 @@ app.get('/test',(req,res)=>{res.json({"status":"api_Visionaria_Dream"})})
 
 
 let httpServ = http.createServer(app);
-httpServ.listen(5052,()=>console.log('servidor en puerto: 5052'));
+httpServ.listen(5050,()=>console.log('servidor en puerto: 5050'));
 
 module.exports = app;
