@@ -2,7 +2,7 @@ let conn = require('../BD');
 module.exports = {
     getProduct: getProduct,
     getAllProduct: getAllProduct,
-    getaSingleProduct: getaSingleProduct,
+    // getaSingleProduct: getaSingleProduct,
     newProduct: newProduct,
     updateProduct: updateProduct,
     removeProduct: removeProduct
@@ -23,7 +23,7 @@ async function getProduct(req, res, next) {
                             message: 'Error'
                         });
                 } else {
-                    res.status(200).json(data.recordset);
+                    res.status(200).json(data.rows);
                 }
             })
             .catch(function(err) {
@@ -47,7 +47,7 @@ async function getAllProduct(req, res, next) {
                             message: 'Error'
                         });
                 } else {
-                    res.status(200).json(data.recordset);
+                    res.status(200).json(data);
                 }
             })
             .catch(function(err) {
@@ -59,40 +59,42 @@ async function getAllProduct(req, res, next) {
     }
 }
 
-async function getaSingleProduct(req, res, next) {
-    let productID = parseInt(req.params.id);
+async function newProduct(req, res, next) {
+
+    let item = req.body,ID=0;
+    total=0;
+
+    for(let it of item.products) {
+        total+=it.Precio_PR;
+    }
+
+
     try {
-        var q = `SELECT  [PRODUCT_ID],[LEGAL_ENTITY_ID],[PRODUCT_CODE],[PRODUCT_NAME]
-        ,isnull([BARCODE],0) as [BARCODE],isnull([CATEGORY_ID],0) as [CATEGORY_ID] 
-        ,isnull([BRAND_ID],0) as [BRAND_ID] ,[ENABLED_FLAG],[START_DATE_ACTIVE]
-        ,[END_DATE_ACTIVE],[PURCHASING_ITEM_FLAG],[INVENTORY_ITEM_FLAG],[CUSTOMER_ORDER_ENABLED_FLAG]
-        ,[RETURNABLE_FLAG],[TAXABLE_FLAG],[EXPENSE_ACCOUNT],isnull([WEIGHT_UOM_ID],0) as [WEIGHT_UOM_ID]
-        ,isnull([VOLUME_UOM_ID],0) as [VOLUME_UOM_ID],isnull([PRIMARY_UOM_ID],0) as [PRIMARY_UOM_ID]
-        ,[PRIMARY_UNIT_OF_MEASURE],[COST_OF_SALES_ACCOUNT],[SALES_ACCOUNT],[INVENTORY_ITEM_STATUS_CODE]
-        ,[TAX_GROUP],[INVOICE_ENABLED_FLAG],[ITEM_TYPE],[PURCHASING_TAX_GROUP],[ORDERABLE_ON_WEB_FLAG]
-        ,isnull([UNIT_LENGTH],0) as [UNIT_LENGTH],isnull([UNIT_LENGTH],0) as [UNIT_WIDTH]
-        ,isnull([UNIT_HEIGHT],0) as [UNIT_HEIGHT],isnull([UNIT_WEIGHT],0) as [UNIT_WEIGHT]
-        ,isnull([PRODUCT_TYPE],'0') as [PRODUCT_TYPE],isnull([TYPE_OF_SALE],'0') as [TYPE_OF_SALE]
-        ,[ATTRIBUTE1] ,[ATTRIBUTE2],[ATTRIBUTE3],[ATTRIBUTE4],[ATTRIBUTE5]
-        ,[ATTRIBUTE6],[ATTRIBUTE7],[ATTRIBUTE8],[ATTRIBUTE9],[ATTRIBUTE10]
-        ,[ATTRIBUTE11],[ATTRIBUTE12],[ATTRIBUTE13],[ATTRIBUTE14],[ATTRIBUTE15]
-        ,[STATUS],[LAST_UPDATE_DATE],[LAST_UPDATED_BY],[CREATION_DATE],[CREATED_BY]
-        FROM PRODUCTS where PRODUCT_ID=${productID}`;
-        await conn.query(q, function(data, err) {
-                if (err) {
-                    console.log(`error in PRODUCTS.js function 'getaSingleProduct'`);
-                    res.status(400)
-                        .json({
-                            status: 'err',
-                            message: 'Error'
-                        });
-                } else {
-                    res.status(200).json(data.recordset);
-                }
-            })
-            .catch(function(err) {
-                return next(err);
-            });
+        
+        let q = `declare @ID table (ID int);
+        insert into ordenes ([ID_US],[Fecha_OR],[Total_OR],[Estado_OR]) 
+        OUTPUT INSERTED.ID_OR into @ID 
+        VALUES(${item.order.user},SYSDATETIME(),${total},'P');
+        select * from @ID`;
+        console.log(q);
+
+
+        data = await conn.Query(q);
+        console.log(data);
+        try {
+            ID = data.recordset[0].ID;
+        } catch { 
+            ID = 1;
+            console.log('error') 
+        }
+
+        for( it of item.products) {
+           q=` insert into productos_ordenes (ID_OR , ID_PR , Cantidad_PO )VALUES(${ID},${it.ID_PR},1)`;
+           console.log(q)
+           data = await conn.Query(q);
+        }
+        
+        res.status(200).json({status: 'success',message: 'Inserted a new Order'});
 
     } catch (err) {
         throw err;

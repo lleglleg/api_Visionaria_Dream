@@ -9,7 +9,7 @@ router.get('/productos', products.getProduct);
 
 router.get('/all_productos', products.getAllProduct);
 
-router.post('/SIPMENT_ORDER_LINES' , products.newProduct);
+router.post('/order' , products.newProduct);
 
 router.put('/SIPMENT_ORDER_LINES/:id' , products.updateProduct);
 
