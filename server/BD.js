@@ -65,3 +65,33 @@ exports.query = async function(sql, callback) {
     //     callback(null, err);
     // });
 }
+
+exports.Query = async function(query) {
+    let data;
+    return new Promise(async function(resolve, reject) {
+        console.log(query)
+        let data = await pool.query(query);
+        resolve(data);
+        // if (pool2.connected === false) {
+        //     await pool2.connect().then((connection) => {
+        //         data = connection.request().query(query).catch(async function(err) {
+        //             console.log(err);
+        //             reject(err);
+        //         });
+        //         resolve(data);
+
+        //     }).catch((err) => {
+        //         reject(err);
+        //     });
+        // } else {
+
+        //     data = await pool2.request().query(query).catch(async function(err) {
+        //         console.log(err);
+        //         reject(err);
+        //     });
+        //     resolve(data);
+
+        // }
+
+    });
+}
